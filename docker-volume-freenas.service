@@ -1,0 +1,13 @@
+[Unit]
+Description=Docker FreeNAS iSCSI Volume Plugin
+Documentation=https://github.com/daneshih1125/docker-volume-freenas
+
+After=network.target docker.service
+Requires=docker.service
+
+[Service]
+EnvironmentFile=/etc/docker-volume-freenas/docker-volume-freenas.env
+ExecStart=/usr/local/bin/docker-volume-freenas
+
+[Install]
+WantedBy=multi-user.target
