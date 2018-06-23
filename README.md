@@ -1,4 +1,4 @@
-# FreeNAS iSCSI volume plugin for Docker
+# Docker Volume Plugin for FreeNAS
 
 ## Environment 
 
