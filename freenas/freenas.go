@@ -32,6 +32,35 @@ type Volume struct {
 	MountPoint string `json:"mountpoint"`
 }
 
+// $ curl  -H 'Content-Type:application/json' -u root:freenas http://192.168.67.68/api/v1.0/storage/volume/freenas/ |python -m json.tool
+//{
+//    "avail": 59587211264,
+//    "children": [
+//        {
+//            "avail": 57725628416,
+//            "children": [
+//            ...
+//            ...
+// The Avail feild should be the nested  aval value.
+// We need to custom JSON marshalling
+func (v *Volume) UnmarshalJSON(b []byte) error {
+	type OrigVol Volume
+	type Avail struct {
+		Avail int `json:"avail"`
+	}
+	availInfo := &struct {
+		Children []Avail `json:"children"`
+		*OrigVol
+	}{
+		OrigVol: (*OrigVol)(v),
+	}
+	if err := json.Unmarshal(b, &availInfo); err != nil {
+		return err
+	}
+	v.Avail = availInfo.Children[0].Avail
+	return nil
+}
+
 type ZVolume struct {
 	Name    string `json:"name"`
 	VolSize int    `json:"volsize"`
@@ -214,7 +243,6 @@ func (f *FreeNAS) GetISCSITargetList() (targets []ISCSITarget, err error) {
 
 func (f *FreeNAS) CreateISCSITarget(targetName string) (target ISCSITarget, err error) {
 	url := f.url + "/api/v1.0/services/iscsi/target/"
-	//jsonStr := fmt.Sprintf(`{"iscsi_target_name": "%s", "iscsi_target_portalgroup":1}`, targetName)
 	jsonStr := fmt.Sprintf(`{"iscsi_target_name": "%s"}`, targetName)
 	jsonData := []byte(jsonStr)
 	response, err := f.HttpRequest("POST", url, bytes.NewBuffer(jsonData))
