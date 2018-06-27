@@ -5,6 +5,7 @@ build:
 
 install: | docker-volume-freenas
 	@echo "### install docker-volume-freenas"
+	@mkdir -p /mnt/freenas
 	@mkdir -p /etc/docker-volume-freenas
 	@cp docker-volume-freenas.env /etc/docker-volume-freenas/
 	@cp docker-volume-freenas /usr/local/bin/
